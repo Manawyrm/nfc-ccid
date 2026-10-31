@@ -58,19 +58,31 @@ documents the commands.
 
 ## Build and run
 
-```sh
-./fbt launch APPSRC=applications_user/nfc_ccid
-```
-
 Stock firmware does not have the `usb_cdc_ext` USB mode yet. `firmware/usb_cdc_ext.patch`
 adds it (plus an atomic `furi_thread_flags_clear`) on top of upstream commit `9981d9d4`.
-CI applies it, builds the SDK with `./fbt COMPACT=1 DEBUG=0 updater_package` and builds the app
-against that SDK with uFBT. The resulting FAP only runs on firmware with the patch.
+The app only builds against, and runs on, firmware with the patch.
 
-After changing the firmware side, regenerate the patch from the firmware branch:
+Build and flash the patched firmware, then build the app with uFBT against its SDK:
 
 ```sh
-git diff 9981d9d4 HEAD -- furi targets > applications_user/nfc_ccid/firmware/usb_cdc_ext.patch
+git clone https://github.com/flipperdevices/flipperzero-firmware.git
+cd flipperzero-firmware
+git checkout 9981d9d4
+git apply ../nfc_ccid/firmware/usb_cdc_ext.patch
+./fbt COMPACT=1 DEBUG=0 flash_usb_full
+
+cd ../nfc_ccid
+ufbt update --local=../flipperzero-firmware/dist/f7-C/flipper-z-f7-sdk-local.zip --hw-target=7
+ufbt launch
+```
+
+CI does the same (without flashing) and publishes the FAP as a build artifact.
+
+The patch is the firmware side of the `nfc-ccid` branch in the firmware tree. After changing
+it there, regenerate it with:
+
+```sh
+git diff 9981d9d4 HEAD -- furi targets > ../nfc_ccid/firmware/usb_cdc_ext.patch
 ```
 
 Starting the app switches USB to CDC + CCID, so the host sees the Flipper reconnect.
