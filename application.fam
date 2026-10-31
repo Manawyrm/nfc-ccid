@@ -7,5 +7,5 @@ App(
     stack_size=2 * 1024,
     fap_category="NFC",
     fap_version="0.1",
-    fap_description="Use Flipper as a USB CCID smartcard reader for ISO 14443 cards",
+    fap_description="USB CCID smartcard reader for ISO 14443-4A and ISO 15693 cards",
 )

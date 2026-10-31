@@ -19,7 +19,8 @@
 #define CCID_EP_NOTIFY_SIZE (8)
 
 /* Interrupt endpoint for slot change notifications. It is optional in CCID, without it
- * the host polls PC_to_RDR_GetSlotStatus instead. */
+ * the host polls PC_to_RDR_GetSlotStatus instead. Off by default: everything was tested
+ * without it, it was switched off while chasing the lost bulk OUT events. */
 #ifndef CCID_USE_NOTIFY_EP
 #define CCID_USE_NOTIFY_EP (0)
 #endif
@@ -254,7 +255,6 @@ static void ccid_usb_ep_callback(usbd_device* dev, uint8_t event, uint8_t ep) {
     }
 
     if(event == usbd_evt_eprx) {
-        ccid_usb->stats.isr_rx++;
         ccid_usb_set_event(ccid_usb, CcidUsbEventRx);
     } else if(event == usbd_evt_eptx) {
         if(ep == CCID_EP_IN) {
@@ -638,10 +638,6 @@ static void ccid_usb_handle_message(CcidUsb* instance, size_t payload_size) {
 
     FURI_LOG_T(TAG, "Message 0x%02X seq %u size %u", type, seq, payload_size);
 
-    instance->stats.messages++;
-    instance->stats.last_type = type;
-    instance->stats.last_seq = seq;
-
     if(slot != 0) {
         uint8_t response_type = RDR_TO_PC_SLOTSTATUS;
         if(type == PC_TO_RDR_ICCPOWERON || type == PC_TO_RDR_XFRBLOCK ||
@@ -697,8 +693,6 @@ static bool ccid_usb_receive(CcidUsb* instance) {
     if(packet_size < 0) {
         return false;
     }
-
-    instance->stats.reads++;
 
     if(packet_size == 0) {
         return true;
@@ -785,7 +779,7 @@ static int32_t ccid_usb_worker(void* context) {
             // Idle: make sure no bulk OUT packet is waiting without its event
             if(ccid_usb_receive(instance)) {
                 instance->stats.recovered++;
-                FURI_LOG_W(TAG, "Recovered bulk OUT packet without event");
+                FURI_LOG_D(TAG, "Recovered bulk OUT packet without event");
             }
             continue;
         }

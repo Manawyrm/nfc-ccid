@@ -211,7 +211,6 @@ static size_t nfc_ccid_iso15693_command(
 }
 
 static NfcCommand nfc_ccid_iso15693_activate(NfcCcidCard* instance) {
-    FURI_LOG_D(TAG, "Activate");
     nfc_ccid_card_fail_requests(instance);
 
     const Iso15693_3Data* data = (const Iso15693_3Data*)nfc_poller_get_data(instance->poller);
@@ -236,11 +235,6 @@ static NfcCommand nfc_ccid_iso15693_activate(NfcCcidCard* instance) {
 
     nfc_ccid_card_publish_atr(instance, iso15693_atr_historical, sizeof(iso15693_atr_historical));
     nfc_ccid_card_set_present(instance, true);
-    FURI_LOG_D(
-        TAG,
-        "Activated, %u blocks x %u bytes",
-        instance->info.block_count,
-        instance->info.block_size);
 
     return NfcCommandContinue;
 }
@@ -266,7 +260,6 @@ NfcCommand nfc_ccid_card_iso15693_callback(NfcGenericEvent event, void* context)
     }
 
     if(poller_event->type != Iso15693_3PollerEventTypeReady) {
-        FURI_LOG_D(TAG, "Poller error %d", poller_event->data->error);
         instance->active = false;
         nfc_ccid_card_set_present(instance, false);
         return nfc_ccid_card_end_session(instance);

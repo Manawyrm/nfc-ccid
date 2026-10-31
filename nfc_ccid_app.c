@@ -5,8 +5,6 @@
 #include "ccid_usb.h"
 #include "nfc_ccid_card.h"
 
-#define TAG "NfcCcid"
-
 #define NFC_CCID_REFRESH_MS (250)
 
 typedef struct {
@@ -75,13 +73,7 @@ static void nfc_ccid_app_draw_callback(Canvas* canvas, void* context) {
     canvas_draw_str(canvas, 0, 52, line);
 
     snprintf(
-        line,
-        sizeof(line),
-        "irq %lu rd %lu rec %lu txe %lu",
-        stats.isr_rx,
-        stats.reads,
-        stats.recovered,
-        stats.tx_errors);
+        line, sizeof(line), "USB lost events %lu  tx err %lu", stats.recovered, stats.tx_errors);
     canvas_draw_str(canvas, 0, 62, line);
 }
 

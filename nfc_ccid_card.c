@@ -195,7 +195,6 @@ static int32_t nfc_ccid_card_thread(void* context) {
         }
 
         // Session: the protocol callback serves the card until it is gone
-        FURI_LOG_D(TAG, "Session start, protocol %u", nfc_ccid_card_protocols[index].protocol);
         instance->session_ended = false;
         instance->active = false;
         instance->poller =
@@ -209,11 +208,9 @@ static int32_t nfc_ccid_card_thread(void* context) {
                 NFC_CCID_CARD_DETECT_PAUSE_MS);
         }
 
-        FURI_LOG_D(TAG, "Session end, stopping poller");
         nfc_poller_stop(instance->poller);
         nfc_poller_free(instance->poller);
         instance->poller = NULL;
-        FURI_LOG_D(TAG, "Poller stopped");
     }
 
     nfc_ccid_card_gone(instance);

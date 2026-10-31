@@ -21,13 +21,8 @@ typedef struct CcidUsb CcidUsb;
 
 /** Diagnostic counters */
 typedef struct {
-    uint32_t isr_rx; /**< Bulk OUT packets signalled by the USB interrupt */
-    uint32_t reads; /**< Bulk OUT packets read by the worker */
-    uint32_t recovered; /**< Packets only found by the idle poll, their event got lost */
-    uint32_t messages; /**< Complete CCID messages handled */
+    uint32_t recovered; /**< Bulk OUT packets only found by the idle poll, their event got lost */
     uint32_t tx_errors; /**< Failed bulk IN writes */
-    uint8_t last_type; /**< bMessageType of the last message */
-    uint8_t last_seq; /**< bSeq of the last message */
 } CcidUsbStats;
 
 /** Card backend callbacks, all of them are called from the CCID worker thread */

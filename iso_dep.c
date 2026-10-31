@@ -35,7 +35,7 @@
 /* PCB + CRC */
 #define ISO_DEP_FRAME_OVERHEAD (3)
 
-/* Carrier frequency in units of 10 kHz, for fc to microseconds conversion */
+/* Carrier cycles per 10 microseconds (13.56 MHz) */
 #define ISO_DEP_FC_PER_10US (136)
 
 static const uint16_t iso_dep_fsc_table[] = {16, 24, 32, 40, 48, 64, 96, 128, 256};
@@ -143,7 +143,7 @@ static void iso_dep_parse_ats(IsoDep* instance) {
     if(sfgi > 0) {
         // Start-up frame guard time before the first block
         const uint32_t sfgt_fc = iso_dep_fwt_from_fwi(sfgi);
-        furi_delay_us(sfgt_fc / ISO_DEP_FC_PER_10US * 10);
+        furi_delay_us(sfgt_fc * 10 / ISO_DEP_FC_PER_10US);
     }
 
     FURI_LOG_I(
