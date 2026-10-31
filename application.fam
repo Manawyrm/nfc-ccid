@@ -1,0 +1,11 @@
+App(
+    appid="nfc_ccid",
+    name="NFC CCID Reader",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="nfc_ccid_app",
+    requires=["gui"],
+    stack_size=2 * 1024,
+    fap_category="NFC",
+    fap_version="0.1",
+    fap_description="Use Flipper as a USB CCID smartcard reader for ISO 14443 cards",
+)
