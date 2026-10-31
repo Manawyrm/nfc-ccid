@@ -50,6 +50,12 @@ upstream, add an entry at the start of the `ifdVendorID`, `ifdProductID` and
 
 A libccid package update overwrites the file.
 
+## Tools
+
+`tools/ntag5_temperature.py` reads NTAG 5 link tags with a TMP117 temperature sensor behind
+the tag's I2C master, using the command sequence of the BeUno app. The header of the script
+documents the commands.
+
 ## Build and run
 
 ```sh
