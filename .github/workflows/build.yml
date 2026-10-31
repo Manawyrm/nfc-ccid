@@ -1,0 +1,60 @@
+name: "uFBT Build"
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+
+# The app needs the usb_cdc_ext USB mode, which stock firmware does not have yet. CI builds
+# the SDK from upstream firmware at a fixed commit with firmware/usb_cdc_ext.patch applied.
+env:
+  FIRMWARE_REPOSITORY: flipperdevices/flipperzero-firmware
+  FIRMWARE_COMMIT: 9981d9d4aa5ec7b14bb46cf15763dd293a7dec6a
+  FBT_GIT_SUBMODULE_SHALLOW: 1
+
+jobs:
+  ufbt-build:
+    runs-on: ubuntu-latest
+    name: 'ufbt: Build for patched OFW'
+    steps:
+      - name: Checkout app
+        uses: actions/checkout@v4
+        with:
+          path: app
+
+      - name: Checkout firmware
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.FIRMWARE_REPOSITORY }}
+          ref: ${{ env.FIRMWARE_COMMIT }}
+          path: firmware
+
+      - name: Patch firmware
+        working-directory: firmware
+        run: git apply --verbose ../app/firmware/usb_cdc_ext.patch
+
+      - name: Build firmware SDK
+        id: build-sdk
+        working-directory: firmware
+        run: |
+          ./fbt COMPACT=1 DEBUG=0 updater_package
+          echo "sdk-file=$(ls "$PWD"/dist/f7-*/flipper-z-f7-sdk-*.zip)" >> "$GITHUB_OUTPUT"
+
+      - name: Set up ufbt with the SDK
+        uses: flipperdevices/flipperzero-ufbt-action@v0.1.3
+        with:
+          task: setup
+          sdk-file: ${{ steps.build-sdk.outputs.sdk-file }}
+          sdk-hw-target: 7
+
+      - name: Build app
+        working-directory: app
+        run: ufbt
+
+      - name: Upload app artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ github.event.repository.name }}-patched-OFW-${{ github.sha }}
+          path: app/dist/*.fap

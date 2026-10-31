@@ -62,6 +62,17 @@ documents the commands.
 ./fbt launch APPSRC=applications_user/nfc_ccid
 ```
 
+Stock firmware does not have the `usb_cdc_ext` USB mode yet. `firmware/usb_cdc_ext.patch`
+adds it (plus an atomic `furi_thread_flags_clear`) on top of upstream commit `9981d9d4`.
+CI applies it, builds the SDK with `./fbt COMPACT=1 DEBUG=0 updater_package` and builds the app
+against that SDK with uFBT. The resulting FAP only runs on firmware with the patch.
+
+After changing the firmware side, regenerate the patch from the firmware branch:
+
+```sh
+git diff 9981d9d4 HEAD -- furi targets > applications_user/nfc_ccid/firmware/usb_cdc_ext.patch
+```
+
 Starting the app switches USB to CDC + CCID, so the host sees the Flipper reconnect.
 Back exits and restores the previous USB mode.
 
